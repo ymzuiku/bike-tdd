@@ -26,5 +26,5 @@
     "jsx": "preserve"
   },
   "exclude": [".vscode", ".git", "node_modules", "umd", "dist"],
-  "include": ["lib", "tdd.js"]
+  "include": ["lib", "tdd.js", "test/index.test.ts"]
 }

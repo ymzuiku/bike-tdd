@@ -2,24 +2,22 @@ const fs = require("fs-extra");
 const path = require("path");
 
 function c8(conf) {
-  if (!fs.existsSync("./node_modules/.bin/c8")) {
-    console.error("Ignore c8, please use like:");
-    console.error("npm install c8 --save-dev");
-    throw new Error("Exit");
-  }
-
   const { spawn } = require("child_process");
-  const ls = spawn("./node_modules/.bin/c8", [
-    `-r=${conf.cover}`,
-    "--check-coverage",
-    "--lines",
-    "100",
-    "--per-file",
-    "bike-tdd",
-    conf.src,
-    // "node",
-    // conf.out + "/index.js",
-  ]);
+  const ls = spawn(
+    "c8",
+    [
+      `-r=${conf.reporter}`,
+      "--wrapper-length",
+      ...(conf.c8Include ? ["--include", conf.c8Include] : []),
+      ...(conf.c8Exclude ? ["--exclude", conf.c8Exclude] : []),
+      ...(conf.c8Config ? ["--exclude", conf.c8Config] : []),
+      "150",
+      conf["skip-full"] == true && "--skip-full",
+      "--clean",
+      "node",
+      conf.out + "/index.js",
+    ].filter(Boolean)
+  );
 
   ls.stdout.on("data", (data) => {
     console.log(`${data}`);
@@ -30,8 +28,8 @@ function c8(conf) {
   });
 
   ls.on("close", (code) => {
-    if (conf.cover === "html") {
-      console.log(`Builded cover html:`);
+    if (conf.reporter === "html") {
+      console.log(`Builded reporter html:`);
       console.log(`${path.resolve(process.cwd(), "coverage")}/index.html`);
     }
   });
