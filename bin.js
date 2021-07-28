@@ -3,23 +3,39 @@
 const cwd = process.cwd();
 const resolve = require("path").resolve;
 const fs = require("fs/promises");
+const c8 = require("./c8");
 const argv = process.argv.splice(2);
-
 const { bike, loadArgs } = require("bike");
 
 const conf = loadArgs(argv);
 conf.entry = resolve(cwd, "node_modules", ".bkie-tdd.runtime.ts");
+if (!conf.isWatch) {
+  conf.once = true;
+}
 
-let isHotFile = false;
-let test = "(.test|.spec|_test|_spec)";
+conf.isHotFile = false;
+conf.cover = undefined;
+conf.port = "3800";
+conf.test = "(.test|.spec|_test|_spec)";
 argv.forEach((item) => {
+  if (/-r/.test(item)) {
+    conf.cover = item.split("=")[1];
+  }
   if (/--hot/.test(item)) {
-    isHotFile = true;
+    conf.isHotFile = true;
   }
   if (/--test/.test(item)) {
-    test = true;
+    conf.test = item.split("=")[1];
+  }
+  if (/--port/.test(item)) {
+    conf.port = item.split("=")[1];
   }
 });
+
+if (conf.cover) {
+  c8(conf);
+  return;
+}
 
 const files = [];
 let waitGroup = 0;
@@ -60,7 +76,7 @@ async function createCode() {
 let createdCoded = false;
 
 async function before() {
-  if (!createdCoded || isHotFile) {
+  if (!createdCoded || conf.isHotFile) {
     await createCode();
     createdCoded = true;
   }
