@@ -7,7 +7,7 @@ const c8 = require("./c8");
 const argv = process.argv.splice(2);
 const { bike, loadArgs } = require("bike");
 
-const conf = loadArgs(argv);
+const conf = loadArgs(argv, true);
 conf.entry = resolve(cwd, "node_modules", ".bkie-tdd.runtime.ts");
 if (!conf.isWatch) {
   conf.once = true;
@@ -33,6 +33,8 @@ argv.forEach((item) => {
 });
 
 if (conf.cover) {
+  conf.isWatch = false;
+  conf.once = true;
   c8(conf);
   return;
 }
@@ -82,4 +84,11 @@ async function before() {
   }
 }
 
-bike({ ...conf, before });
+async function after() {
+  // console.log("bbbbbbbbbbbbbbb");
+  // if (conf.cover) {
+  //   c8(conf);
+  // }
+}
+
+bike({ ...conf, before, after });

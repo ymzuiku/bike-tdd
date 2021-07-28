@@ -1,14 +1,14 @@
 const fs = require("fs-extra");
-
-let isStatied = false;
+const path = require("path");
 
 function c8(conf) {
-  const { spawn } = require("child_process");
   if (!fs.existsSync("./node_modules/.bin/c8")) {
     console.error("Ignore c8, please use like:");
     console.error("npm install c8 --save-dev");
     throw new Error("Exit");
   }
+
+  const { spawn } = require("child_process");
   const ls = spawn("./node_modules/.bin/c8", [
     `-r=${conf.cover}`,
     "--check-coverage",
@@ -17,6 +17,8 @@ function c8(conf) {
     "--per-file",
     "bike-tdd",
     conf.src,
+    // "node",
+    // conf.out + "/index.js",
   ]);
 
   ls.stdout.on("data", (data) => {
@@ -28,19 +30,11 @@ function c8(conf) {
   });
 
   ls.on("close", (code) => {
-    console.log(`cover: http://127.0.0.1:${conf.port}`);
+    if (conf.cover === "html") {
+      console.log(`Builded cover html:`);
+      console.log(`${path.resolve(process.cwd(), "coverage")}/index.html`);
+    }
   });
-
-  if (!isStatied && conf.cover === "html") {
-    isStatied = true;
-    const fastify = require("fastify")({ logger: false });
-    const path = require("path");
-    fastify.register(require("fastify-static"), {
-      root: path.resolve(process.cwd(), "coverage"),
-      prefix: "/",
-    });
-    fastify.listen(conf.port);
-  }
 }
 
 module.exports = c8;
