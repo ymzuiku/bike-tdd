@@ -1,4 +1,3 @@
-const fs = require("fs-extra");
 const path = require("path");
 
 function c8(conf) {
@@ -7,11 +6,15 @@ function c8(conf) {
     "c8",
     [
       `-r=${conf.reporter}`,
-      "--wrapper-length",
+      // "--wrapper-length",
+      // "150",
       ...(conf.c8Include ? ["--include", conf.c8Include] : []),
-      ...(conf.c8Exclude ? ["--exclude", conf.c8Exclude] : []),
-      ...(conf.c8Config ? ["--exclude", conf.c8Config] : []),
-      "150",
+      ...(conf.c8Config ? ["--config", conf.c8Config] : []),
+      // ...(conf.c8Exclude ? ["--exclude", conf.c8Exclude] : []),
+      "--exclude",
+      ["./coverage", "./node_modules", conf.c8Exclude]
+        .filter(Boolean)
+        .join(","),
       conf["skip-full"] == true && "--skip-full",
       "--clean",
       "node",

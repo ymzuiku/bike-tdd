@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 const cwd = process.cwd();
 const resolve = require("path").resolve;
 const fs = require("fs-extra");
